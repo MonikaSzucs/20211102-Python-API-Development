@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi import FastAPI
 from fastapi.params import Body
 from pydantic import BaseModel
+from random import randrange
 
 app = FastAPI()
 
@@ -15,6 +16,11 @@ class Post(BaseModel):
     published: bool = True
     rating: Optional[int] = None
 
+# This is just stored in memory. This gets updated each time you restart the program.
+my_posts = [{"title": "title of post 1", "content": "content of post 1", "id": 1},
+            {"title": "favourite foots", "content": "I like pizza", "id": 2}
+            ]
+
 
 @app.get("/")
 def root():
@@ -23,14 +29,23 @@ def root():
 
 @app.get("/posts")
 def get_posts():
-    return {"data": "This is your posts"}
+    return {"data": my_posts}
 
 
 @app.post("/posts")
 def create_posts(post: Post):
-    print(post)
+    post_dict = post.dict()
+    post_dict['id'] = randrange(0, 1000000)
+    #print(post)
     # Convert posts to dictionary using .dic
-    print(post.dict())
-    print(post.rating)
-    return {"data": post}
+    # print(post.dict())
+    my_posts.append(post_dict)
+    return {"data": post_dict}
     # title str, content str, category, Bool published
+
+
+# path parameter using the ID
+@app.get("/posts/{id}")
+def get_post(id):
+    print(id)
+    return {"post_detail": f"Here is post {id}"}
